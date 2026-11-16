@@ -1,7 +1,7 @@
 from flask import Flask,request,jsonify
 import csv
 import urllib.request as rq
-
+import json
 
 app=Flask(__name__)
 CSV_URL = "https://storage.googleapis.com/qwasar-public/track-ds/imdb-movie-data.csv"
@@ -13,23 +13,26 @@ def get_movies():
 
     return csv.DictReader(lines)
 
-@app.route("/",methods=["GET"])
+@app.route('/',methods=['GET'])
 def filterinhome():
     #data = read_csv()
-    genre =request.args["genre"]
+    genre =request.args.get('genre')
     #with open("imdb-movie-data.csv",newline="\n",encoding="utf-8") as csvfile:
         #reader = csv.DictReader(csvfile)
-    print(get_movies())
+    #print(get_movies())
     results = []
     for row in get_movies():
         for key in row:
-            if row[key] == "":
+            if row[key] == '':
                 row[key] = None
-        if genre is None or genre.lower() in row["Genre"].lower():
+        genres = row["Genre"].split(",")
+        for g in genres:
+            if g.lower() == genre.lower():
                     results.append(row)
-   # return jsonify(results)
-    return str(results)
-    #return jsonify({"/": "route reached","Genre": genre})
+                    break
+    #return jsonify(len(results))
+    #return [results]
+    return json.dumps(results)
 
 """@genres_bp.route("/<genreval>",methods=["Get"])
 def filterbyparam(genreval):
@@ -40,21 +43,29 @@ def filterbyparam(genreval):
                 result.append(row)
     return jsonify(results)
 """
-@app.route("/action",methods=["GET"])
+@app.route('/action',methods=['GET'])
 def filteraction():
-    print("action called")
+    #print("action called")
     #data = read_csv()
     #with open("imdb-movie-data.csv",newline="\n",encoding="utf-8") as csvfile:
         #reader = csv.DictReader(csvfile)
     results=[]
     for row in get_movies():
-        if "action" in row["Genre"].lower():
-            results.append(row)
+        for key in row:
+            if row[key] == '':
+                row[key] = None
+        genres = row["Genre"].split(",")
+        for g in genres:
+            if "action" == g.lower():
+                results.append(row)
+                break        
     #return jsonify(results)
-    return str(results)
+    return json.dumps(results)
+
+    #return jsonify(len(results))
 
 
-@app.route("/adventure",methods=["GET"])
+@app.route('/adventure',methods=['GET'])
 def filteradventure():
     #data = read_csv()
     #with open("imdb-movie-data.csv",newline="\n",encoding="utf-8") as csvfile:
@@ -64,29 +75,35 @@ def filteradventure():
         for key in row:
             if row[key] == "":
                 row[key] = None
-        if "adventure" in row["Genre"].lower():
-            results.append(row)
-    
-    return str(results)
-    #return jsonify(results)
+        genres = row["Genre"].split(",")
+        for g in genres:
+            if "adventure" == g.lower():
+                results.append(row)
+                break   
+    #return str(results)
+    #return jsonify(len(results))
+    return json.dumps(results)
 
-@app.route("/comedy",methods=["GET"])
+
+@app.route('/comedy',methods=['GET'])
 def filtercomedy():
-    #data = read_csv()
-    #with open("imdb-movie-data.csv",newline="\n",encoding="utf-8") as csvfile:
-        #reader = csv.DictReader(csvfile)
     results=[]
     for row in get_movies():
         for key in row:
             if row[key] == "":
                 row[key] = None
-        if "comedy" in row["Genre"].lower():
-            results.append(row)
-    #return jsonify(results)
-    return str(results)
+        genres = row["Genre"].split(",")
+        for g in genres:
+            if "comedy"== g.lower():
+                results.append(row)
+                break
+    #return jsonify(len(results))
+    #return str(results)
+    return json.dumps(results)
 
 
-@app.route("/drama",methods=["GET"])
+
+@app.route('/drama',methods=['GET'])
 def filterdrama():
     #data = read_csv()
     #with open("imdb-movie-data.csv",newline="\n",encoding="utf-8") as csvfile:
@@ -96,38 +113,44 @@ def filterdrama():
         for key in row:
             if row[key] == "":
                 row[key] = None
-        if "drama" in row["Genre"].lower():
-            results.append(row)
-    return str(results)
+        genres = row["Genre"].split(",")
+        for g in genres:
+            if "drama"== g.lower():
+                results.append(row)
+    #return str(results)
+    return json.dumps(results)
 
-    #return jsonify(results)
+    #return jsonify(len(results))
 
-@app.route('/debug',methods=['GET'])
+"""@app.route('/debug',methods=['GET'])
 def debug():
     return jsonify({"debug": "route reached"})
-
+"""
 @app.route('/romance',methods=['GET'])
 def filterromance():
     #data = read_csv()
     #with open("imdb-movie-data.csv",newline="\n",encoding="utf-8") as csvfile:
         #reader = csv.DictReader(csvfile)
     results=[]
-    print(get_movies())
+    #print(get_movies())
     for row in get_movies():
         for key in row:
             if row[key] == "":
                 row[key] = None
-        if "romance" in row["Genre"].lower():
-            results.append(row)
-    return str(results)
+        genres = row["Genre"].split(",")
+        for g in genres:
+            if "romance"== g.lower():
+                results.append(row)
+    #return results
+    return json.dumps(results)
 
-    #return jsonify(results)
+    #return jsonify(len(results))
 
-print("STARTING SERVER", flush=True)
+#print("STARTING SERVER", flush=True)
 
 if __name__=="__main__":
     app.run(
         host="0.0.0.0",
         port=8080,
-        debug=False
+        debug=True
     )
